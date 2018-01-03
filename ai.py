@@ -1,4 +1,4 @@
-import random
+import random, logging
 import board
 
 inserted = False
@@ -49,10 +49,11 @@ def computer_move_difficulty_2(player, opponent, game_round):
 				#last_move = move_par
 				if board.result_checking():
 					#Solution found
+					logging.debug("One-move win on: " + str(move_par))
 					inserted = True
 					return True
 				else:
-					#Player has not possible win, reversing change
+					#Player has no possible win, reversing change
 					board.move_insertion(" ", move_par)
 	#Blocks opponent from winning in one move
 	if game_round >= 4 and inserted == False:
@@ -61,11 +62,12 @@ def computer_move_difficulty_2(player, opponent, game_round):
 				board.move_insertion(opponent, move_par)
 				if board.result_checking():
 					# Solution found
+					logging.debug("One-move win prevention on: " + str(move_par))
 					board.move_insertion(player, move_par)
 					inserted = True
 					return True
 				else:
-					# Opponent has not possible win, reversing change
+					# Opponent has no possible win, reversing change
 					board.move_insertion(" ", move_par)
 					if move_par == 9:
 						inserted = False
@@ -93,7 +95,7 @@ def find_fork_available_rows(player, purpose):
 		#print (single_row_content)
 		if single_row_content.count(player) == 1 and single_row_content.count(" ") == 2:
 			rows_fork_available.append(single_row)
-	#print ("Rows qualified", rows_fork_available)
+	logging.debug("Rows within fork criteria for " + str(player) + ": " + str(rows_fork_available))
 	if purpose == "many_forks":
 		return rows_fork_available
 	else:
@@ -104,20 +106,16 @@ def find_fork_overlaping_rows(rows_fork_available, player, purpose):
 	global inserted, move_par, overlaping_field, ile_forkow
 	overlaping_field = 0
 	for first_row in rows_fork_available:
-		#print ("\n Dla wiersza:", first_row)
 		for second_row in rows_fork_available:
 			if second_row != first_row:
-				#print (second_row)
 				for first_row_element in first_row:
 					if first_row_element in second_row:
-						# Ustala ze wiersze sie przecinaja
-						#print ("przecina sie z", second_row)
+						logging.debug("Overlaping rows: "+str(first_row)+str(second_row))
 						find_overlaping_field (first_row, second_row)
 						if purpose == "fork_create":
-							#print ("zostalo pole", overlaping_field)
 							if overlaping_field != 0 and found == True:
-								#print ("Fork zalozony")
 								move_par = overlaping_field
+								logging.debug("Fork made on: " + str(move_par))
 								board.move_insertion(player, move_par)
 								inserted = True
 								ile_forkow += 1
@@ -126,12 +124,11 @@ def find_fork_overlaping_rows(rows_fork_available, player, purpose):
 def find_overlaping_field (first_row, second_row):
 	global overlaping_field, found, fork_field_for_blok
 	found = False
-	#print ("Wspolne dla:", first_row, second_row)
 	for temp_overlaping_field in first_row:
 		for y in second_row:
 			if temp_overlaping_field == y and board.board[temp_overlaping_field] == " ":
 				# Finds overlaping field
-				#print ("Pole wspolne to:", temp_overlaping_field, "wartosc:", board.board[temp_overlaping_field])
+				logging.debug("Rows overlaping on field " + str(temp_overlaping_field))
 				overlaping_field = temp_overlaping_field
 				if overlaping_field not in fork_field_for_blok:
 					fork_field_for_blok.append(overlaping_field)
@@ -150,15 +147,14 @@ def computer_move_difficulty_4(player, opponent, game_round):
 		find_fork_available_rows(opponent, "fork_block")
 		# print ("Pola do forkow:", fork_field_for_blok, "liczba:", len(fork_field_for_blok))
 		if len(fork_field_for_blok) == 1:
-			# print ("One fork identified - blocking")
 			move_par = fork_field_for_blok[0]
+			logging.debug("Opponent has one fork available. Blocking at: " + str(move_par))
 			board.move_insertion(player, move_par)
 			inserted = True
 			ile_blokad_forkow1 += 1
 		elif len(fork_field_for_blok) == 2:
-			# print ("Two forks identified")
 			rows_fork_available = find_fork_available_rows(player, "many_forks")
-			# print (rows_fork_available)
+			logging.debug("Opponent has two forks available ("+str(rows_fork_available))
 			for i in rows_fork_available:
 				fork_blok_check = 0
 				for j in fork_field_for_blok:
@@ -172,14 +168,14 @@ def computer_move_difficulty_4(player, opponent, game_round):
 				while True:
 					field_to_block_fork = row_to_block_fork[random.randrange(0,3)]
 					if board.board[field_to_block_fork] == " ":
-						# print ("Wstawiam na:", field_to_block_fork)
 						move_par = field_to_block_fork
+						logging.debug("Blocking double fork on " + str(move_par))
 						board.move_insertion(player, move_par)
 						inserted = True
 						ile_blokad_forkow2 += 1
 						break
 			else:
-				# nie ma w calosci wolnego rzedu, ktory blokowalby podwojny fork
+				# There is no empty row which may prevent blocking fork
 				pass
 	else:
 		inserted = False

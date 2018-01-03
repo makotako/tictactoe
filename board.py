@@ -1,3 +1,4 @@
+import logging
 
 def board_cleaning():
 	# Cleaning board after the previous game round
@@ -65,3 +66,14 @@ def move_insertion(player, move_par):
 	global last_move
 	board[move_par] = player
 	last_move = move_par
+
+def board_printing_debug(game_round):
+	# Turn off to increase the program performance (3x higher speed)
+	logging.info(("Round "+str(game_round)).center(13,"-"))
+	logging.info("-------------")
+	logging.info("| "+str(board[1])+" | "+str(board[2])+" | "+str(board[3])+" |")
+	logging.info("-------------")
+	logging.info("| "+str(board[4])+" | "+str(board[5])+" | "+str(board[6])+" |")
+	logging.info("-------------")
+	logging.info("| "+str(board[7])+" | "+str(board[8])+" | "+str(board[9])+" |")
+	logging.info("-------------")
